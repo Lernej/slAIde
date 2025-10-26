@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Game of Thrones Presentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Open+Sans:wght@400;600&display=swap');
+
+  body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #1a1a1a; /* Dark background for epic feel */
+    color: #e0e0e0; /* Light text for contrast */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden; /* Hide scrollbars if content is slightly larger than screen */
+    position: relative;
+  }
+
+  .slide {
+    display: none;
+    background: linear-gradient(135deg, #2c2c2c, #1f1f1f); /* Subtle gradient for depth */
+    border: 1px solid #4a4a4a; /* Darker border */
+    margin: 20px auto;
+    padding: 40px 60px;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Deeper shadow */
+    max-width: 900px;
+    min-height: 500px;
+    box-sizing: border-box;
+    position: relative;
+    overflow-y: auto; /* Allow scrolling for long slides */
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    transform: scale(0.95);
+    opacity: 0;
+  }
+
+  .slide.active {
+    display: block;
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .epic h1 {
+    font-family: 'Cinzel', serif; /* Regal font for titles */
+    color: #ffd700; /* Goldish yellow for emphasis */
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.8em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    border-bottom: 2px solid #5a5a5a;
+    padding-bottom: 15px;
+  }
+
+  .epic ul {
+    list-style: none; /* Remove default bullets */
+    padding-left: 0;
+    margin-top: 25px;
+  }
+
+  .epic ul li {
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    line-height: 1.6;
+  }
+
+  .epic ul li::before {
+    content: '⚔'; /* Sword icon for epic theme */
+    color: #a02020; /* Deep red for accent */
+    font-size: 1.2em;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .epic strong {
+    color: #ffd700; /* Goldish yellow for strong text */
+  }
+
+  .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Cinzel', serif;
+    font-size: 3em; /* Larger arrows */
+    background: #a02020; /* Deep red, matching the sword icon */
+    color: #ffd700; /* Goldish yellow text */
+    border: none;
+    border-radius: 50%;
+    width: 70px; /* Larger buttons */
+    height: 70px;
+    cursor: pointer;
+    opacity: 0.8;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+  }
+
+  .arrow:hover {
+    background-color: #c03030; /* Slightly lighter red on hover */
+    opacity: 1;
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  #prev {
+    left: 30px;
+  }
+
+  #next {
+    right: 30px;
+  }
+</style>
+</head>
+<body class="epic">
+  <button class="arrow" id="prev">&#10094;</button> <!-- Left angle bracket for prev -->
+  <button class="arrow" id="next">&#10095;</button> <!-- Right angle bracket for next -->
+
+  <div class="slide active"><h1>Introduction to Game of Thrones</h1><ul><li>Based on George R.R. Martin's epic fantasy novels, A Song of Ice and Fire.</li><li>Aired on HBO from 2011 to 2019, spanning eight highly anticipated seasons.</li><li>Set on the fictional continents of Westeros and Essos, a world of intricate political and magical conflicts.</li><li>Follows noble families vying for control of the Iron Throne and the Seven Kingdoms.</li><li>Explores themes of power, betrayal, family, honor, and the constant threat of a supernatural winter.</li><li>Became a global cultural phenomenon, known for its complex characters and unpredictable plot twists.</li></ul></div>
+  <div class="slide"><h1>Origins: A Song of Ice and Fire</h1><ul><li>The series is an adaptation of George R.R. Martin's ongoing fantasy book series.</li><li>The first novel, 'A Game of Thrones,' was published in 1996, laying the groundwork for the expansive world.</li><li>Martin's intricate storytelling and character development attracted a dedicated readership long before the show.</li><li>The books are known for their gritty realism, moral ambiguity, and multi-POV narrative structure.</li><li>The television adaptation brought Martin's richly detailed universe to a massive global audience, expanding its reach exponentially.</li></ul></div>
+  <div class="slide"><h1>The World of Westeros and Essos</h1><ul><li>Westeros is divided into Seven Kingdoms, each with distinct climates, cultures, and noble houses.</li><li>Essos, the eastern continent, features ancient cities, vast Dothraki plains, and mysterious lands.</li><li>The Narrow Sea separates the two continents, crucial for trade and strategic movements.</li><li>Diverse geographies range from the frozen North beyond the Wall to the sunny Dornish deserts.</li><li>Home to various peoples, ancient ruins, and forgotten histories that influence current events.</li></ul></div>
+  <div class="slide"><h1>The Great Houses: Power and Intrigue</h1><ul><li><strong>House Stark:</strong> The honorable, steadfast rulers of the North, known for their motto "Winter Is Coming."</li><li><strong>House Lannister:</strong> Wealthy, cunning, and ruthless, they always pay their debts and strive for dominance.</li><li><strong>House Targaryen:</strong> The exiled dragonlords, seeking to reclaim their ancestral Iron Throne through conquest.</li><li><strong>House Baratheon:</strong> Once rulers of the Iron Throne, their claim is central to early conflicts.</li><li>The relentless struggle for power among these and other noble houses drives much of the series' political drama and betrayals.</li></ul></div>
+  <div class="slide"><h1>Dragons, White Walkers, and Magic</h1><ul><li><strong>Dragons:</strong> Ancient, powerful beasts thought extinct, reborn through Daenerys Targaryen, becoming instruments of war.</li><li><strong>White Walkers:</strong> An ancient, supernatural threat from beyond the Wall, bringing an army of the dead and eternal winter.</li><li><strong>Magic:</strong> A subtle yet potent force, resurfacing in various forms, from blood magic and prophecies to shadow binding and fire resistance.</li><li>The Children of the Forest are an ancient race with deep ties to magic and the weirwood trees.</li><li>These fantastical elements escalate the stakes beyond political conflict to a battle for the very survival of humanity.</li></ul></div>
+  <div class="slide"><h1>Themes of Power, Betrayal, and Survival</h1><ul><li><strong>Power:</strong> Explored through different lenses—inherited right, military might, political cunning, and moral authority.</li><li><strong>Betrayal:</strong> A constant undercurrent, as alliances shift and characters make brutal decisions for personal or familial gain.</li><li><strong>Survival:</strong> Characters constantly face life-or-death situations, adapting and making morally ambiguous choices to endure.</li><li>The show delves into the corrupting nature of power and the heavy cost of ambition.</li><li>It frequently challenges traditional notions of heroism, showing that even the most honorable can fall, and the most unlikely can rise.</li></ul></div>
+  <div class="slide"><h1>Game of Thrones' Legacy and Impact</h1><ul><li>Achieved unprecedented critical and commercial success, breaking viewership records for HBO.</li><li>Revolutionized television production with its cinematic scope, complex storytelling, and high production values.</li><li>Sparked global conversations, fan theories, and analyses, cementing its place in popular culture.</li><li>Its intricate world-building and character development inspired a new generation of fantasy storytelling.</li><li>Paved the way for numerous spin-offs and prequels, expanding the 'A Song of Ice and Fire' universe further.</li><li>Left an indelible mark on the landscape of modern television, demonstrating the power of serialized epic fantasy.</li></ul></div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let currentSlideIndex = 0;
+
+  function showSlide(index) {
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === index);
+    });
+  }
+
+  document.getElementById('prev').addEventListener('click', () => {
+    currentSlideIndex = (currentSlideIndex - 1 + slides.length) % slides.length;
+    showSlide(currentSlideIndex);
+  });
+
+  document.getElementById('next').addEventListener('click', () => {
+    currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+    showSlide(currentSlideIndex);
+  });
+
+  // Initial display of the first slide
+  showSlide(currentSlideIndex);
+</script>
+</body>
+</html>
