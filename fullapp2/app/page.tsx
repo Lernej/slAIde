@@ -1,11 +1,12 @@
 "use client";
 
-import FileUploadClient from "./components/FileUploadClient";
+// Removed FileDropzone import
 import LiquidEther from "./components/Background";
-import DiscordLoginButton from "./components/DiscordLoginButton";
+// Removed unused DiscordLoginButton import
 import Image from "next/image";
 import { useRef, useEffect, useState } from "react";
 import DOMPurify from "dompurify";
+import Dictaphone from "./components/Dictaphone";
 
 export default function Home() {
   const learnMoreRef = useRef<HTMLDivElement | null>(null);
@@ -13,11 +14,11 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [htmlString, setHtmlString] = useState("");
-  const [showHtml, setShowHtml] = useState(false); // 👈 controls overlay visibility
+  const [showHtml, setShowHtml] = useState(false);
   const [htmlUrl, setHtmlUrl] = useState("");
 
-  // New state for pdf
-  const [artifactUrl, setArtifactUrl] = useState<string>(""); // points to /api/artifact?path=...
+  // New state for pdf/html artifacts saved on disk
+  const [artifactUrl, setArtifactUrl] = useState<string>("");
   const [artifactKind, setArtifactKind] = useState<"html" | "pdf" | "">("");
 
   // Helper to strip Markdown/Docstring fences from inline HTML
@@ -30,8 +31,6 @@ export default function Home() {
     if (m) return m[1].trim();
     m = trimmed.match(singleQuoteFence);
     if (m) return m[1].trim();
-
-    // Fallback: remove leading/trailing fences and any stray fence-only lines
     let out = trimmed
       .replace(/^```html\s*/i, "")
       .replace(/^```/i, "")
@@ -39,46 +38,37 @@ export default function Home() {
       .replace(/^'''html\s*/i, "")
       .replace(/^'''/i, "")
       .replace(/'''$/i, "");
-
-    // Remove any standalone fence lines anywhere in the doc
     out = out.replace(/(^|\n)\s*```(?:\w+)?\s*(?=\n|$)/g, "$1");
     out = out.replace(/(^|\n)\s*'''(?:\w+)?\s*(?=\n|$)/g, "$1");
-
-    // As a final guard, remove any remaining triple-backticks or triple-single quotes
     out = out.replace(/```/g, "");
     out = out.replace(/'''/g, "");
-
     return out;
   };
 
+  // Update HTML preview URL when htmlString changes
   useEffect(() => {
     if (!htmlString) return;
-
-    // Create blob from cleaned HTML (do not mutate htmlString here)
-    const cleaned = stripFences(htmlString);
-    const blob = new Blob([cleaned], { type: "text/html" });
+    const blob = new Blob([stripFences(htmlString)], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     setHtmlUrl(url);
-
-    return () => URL.revokeObjectURL(url); // clean up old URLs
+    return () => URL.revokeObjectURL(url);
   }, [htmlString]);
 
-  // Helper to call our proxy API and normalize Host response
+  // Proxy to Host to generate artifact
   const generateArtifact = async (prompt: string) => {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt }),
     });
-
     if (!res.ok) {
       const text = await res.text();
       throw new Error(`Generate failed: ${res.status} ${text}`);
     }
-
     return res.json();
   };
 
+  // Prompt AI agent (keeps current functionality)
   const promptAgent = async () => {
     setLoading(true);
     setArtifactUrl("");
@@ -86,21 +76,16 @@ export default function Home() {
     setHtmlString("");
     setHtmlUrl("");
     try {
-      // Send user message to Host through proxy so we avoid CORS and handle both HTML/PDF
       const data = await generateArtifact(message.trim());
-
       if (data.kind === "pdf" && typeof data.filePath === "string") {
-        // Stream the PDF through our artifact route
         const url = `/api/artifact?path=${encodeURIComponent(data.filePath)}`;
         setArtifactKind("pdf");
         setArtifactUrl(url);
       } else if (data.kind === "html" && typeof data.filePath === "string") {
-        // Stream the saved HTML file from disk
         const url = `/api/artifact?path=${encodeURIComponent(data.filePath)}`;
         setArtifactKind("html");
         setArtifactUrl(url);
       } else if (data.kind === "html-inline" && typeof data.html === "string") {
-        // Fallback when Host returns the HTML string directly — strip fences
         setArtifactKind("html");
         setHtmlString(stripFences(data.html));
       } else {
@@ -114,12 +99,6 @@ export default function Home() {
       setLoading(false);
     }
   };
-
-  async function testConnection() {
-    const response = await fetch("http://localhost:8000/list-apps");
-    const agents = await response.json();
-    console.log("Available agents:", agents);
-  }
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth";
@@ -137,7 +116,7 @@ export default function Home() {
       {/* Background */}
       <div className="absolute inset-0 -z-10">
         <LiquidEther
-          className="absolute top-0 left-0 w-full h-full -z-10"
+          className="absolute top-0 left-0 w-full h-screen"
           colors={["#5227FF", "#FF9FFC", "#B19EEF"]}
           mouseForce={20}
           cursorSize={100}
@@ -147,7 +126,7 @@ export default function Home() {
           iterationsPoisson={32}
           resolution={0.5}
           isBounce={false}
-          autoDemo={true}
+          autoDemo
           autoSpeed={0.5}
           autoIntensity={2.2}
           takeoverDuration={0.25}
@@ -156,31 +135,38 @@ export default function Home() {
         />
       </div>
 
-      {/* ✅ Loading Overlay */}
+      {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
           <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
         </div>
       )}
 
-      {/* ✅ AI Result Overlay */}
-
-      {/* Main container */}
+      {/* Main Container */}
       <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-6xl gap-10 bg-black/40 backdrop-blur-xl rounded-3xl p-10 border border-white/10 shadow-2xl">
-        {/* Left content */}
-        <div className="flex-1 text-left text-white space-y-6">
-          <h1 className="text-5xl font-extrabold bg-linear-to-r from-purple-300 to-pink-400 bg-clip-text text-transparent leading-tight">
-            Presentations Made Easy with AI
+        {/* Left Content (match provided text) */}
+        <div className="flex-1 text-left text-white">
+          {/* Heading */}
+          <h1 className="text-4xl font-extrabold bg-linear-to-r from-purple-300 to-pink-400 bg-clip-text text-transparent leading-tight text-center space-y-2">
+            <span>Presentations </span>
+            <span>and PDF Generation at the Click of a Button</span>
           </h1>
-          <p className="text-lg text-gray-200 leading-relaxed">
-            Transform your{" "}
-            <span className="font-semibold text-purple-300">MP3</span> or{" "}
-            <span className="font-semibold text-pink-300">MP4</span> files into
-            beautiful, AI-generated presentations in seconds.
-            <br /> Just drag your file into the box on the right — we’ll handle
-            the rest!
+          <span className="block h-1 w-full bg-pink-500 mx-auto my-2 rounded-full"></span>
+          {/* Paragraphs */}
+          <p className="text-lg text-gray-200 leading-relaxed mt-2">
+            Transform your text or microphone input into polished results — no
+            setup required.
+          </p>
+          <p className="text-2xl font-extrabold text-purple-300 leading-relaxed ">
+            AI-generated presentations and summaries
+          </p>
+          <p className="text-lg text-gray-200 leading-relaxed mt-2">
+            Type in the box or use the microphone — our A2A agents route your
+            request and generate either a slideshow or a PDF summary
+            automatically.
           </p>
 
+          {/* Button */}
           <div className="pt-4">
             <button
               onClick={scrollToLearnMore}
@@ -191,26 +177,33 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Right side drop zone */}
+        {/* Right Content */}
         <div className="flex-1 flex flex-col items-center gap-4">
-          <FileUploadClient />
-          <button
-            onClick={promptAgent}
-            className="bg-white text-black rounded-xl p-2 font-semibold hover:bg-gray-200 transition-all"
-          >
-            Enter
-          </button>
-          <textarea
-            placeholder="Enter instructions or preferences for your presentation..."
-            className="w-full mt-4 p-4 rounded-2xl bg-pink-50/20 border border-pink-400 placeholder-pink-200 text-white focus:ring-2 focus:ring-pink-400 focus:outline-none transition-colors"
-            rows={4}
-            onChange={(e) => setMessage(e.target.value)}
-          />
+          {/* Generated HTML Links (inline htmlString) */}
+          {htmlUrl && (
+            <div className="mt-4 flex gap-4">
+              <a
+                href={htmlUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all"
+              >
+                Open Generated Slideshow
+              </a>
+              <a
+                href={htmlUrl}
+                download="generated.html"
+                className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-all"
+              >
+                Download Slideshow
+              </a>
+            </div>
+          )}
 
-          {/* Action buttons after generation */}
+          {/* Artifact buttons when files are saved to disk (retain current functionality) */}
           {(artifactKind === "html" || artifactKind === "pdf") &&
             artifactUrl && (
-              <div className="mt-4 flex gap-4">
+              <div className="mt-2 flex gap-4">
                 <a
                   href={artifactUrl}
                   target="_blank"
@@ -231,26 +224,31 @@ export default function Home() {
               </div>
             )}
 
-          {/* Inline HTML fallback */}
-          {artifactKind === "html" && !artifactUrl && htmlUrl && (
-            <div className="mt-4 flex gap-4">
-              <a
-                href={htmlUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all"
-              >
-                Open Generated Slideshow
-              </a>
-              <a
-                href={htmlUrl}
-                download="generated.html"
-                className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-all"
-              >
-                Download Slideshow
-              </a>
+          {/* Bigger Textarea */}
+          <textarea
+            placeholder="Enter instructions or preferences for your presentation..."
+            className="w-full mt-4 p-4 rounded-2xl bg-pink-50/20 border border-pink-400 placeholder-pink-200 text-white focus:ring-2 focus:ring-pink-400 focus:outline-none transition-colors min-h-48 md:min-h-64"
+            rows={10}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
+
+          <div className="flex items-center w-full mx-auto">
+            {/* Microphone Input */}
+            <div className="flex-1 sm:flex-none justify-start items-end">
+              <Dictaphone appendToMessage={setMessage} />
             </div>
-          )}
+
+            {/* Enter Button */}
+            <div className="flex justify-center w-full mt-4">
+              <button
+                onClick={promptAgent}
+                className="px-6 py-3 bg-linear-to-r from-purple-500 to-pink-500 text-white font-bold rounded-2xl shadow-lg hover:opacity-90 transition-all duration-300"
+              >
+                Enter
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -264,10 +262,14 @@ export default function Home() {
             How It Works
           </h2>
           <p className="text-lg text-gray-300 leading-relaxed">
-            Upload your audio or video file, and our app will automatically
-            extract key points, generate slides, and create a polished
-            presentation saving you hours of work. By utilizing Google's
-            advanced A2A AI agent etc......
+            Our app uses A2A (Agent‑to‑Agent) decision routing to choose the
+            right workflow for your input. You can type or speak; ADK-based
+            agents coordinate the steps to call LLMs, format the content, and
+            render the output. Depending on your request, the system produces
+            either an HTML slide deck or a PDF summary — optimized for clarity
+            and accuracy. The goal is simple: make creating presentations or
+            summaries easy, fast, and accessible for everyone — even those with
+            no technical background.
           </p>
         </div>
 

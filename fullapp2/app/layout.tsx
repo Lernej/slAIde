@@ -30,7 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
       >
         {/* ✅ Global Header */}
-        <Header title="sl" />
+        <Header title="slAI" />
 
         {/* ✅ Add padding so content isn’t hidden under the fixed header */}
         <main className="pt-24 flex justify-center">{children}</main>
