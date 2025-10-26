@@ -1,0 +1,97 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Agents: Run Host",
+      "type": "shell",
+      "command": "uv run python -m hostagent",
+      "options": {
+        "cwd": "${workspaceFolder}/slidAid/slAIde"
+      },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agents: Run Presentation",
+      "type": "shell",
+      "command": "uv run python -m presentation_agent",
+      "options": {
+        "cwd": "${workspaceFolder}/slidAid/slAIde"
+      },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agents: Run Summary",
+      "type": "shell",
+      "command": "uv run python -m summaryagent",
+      "options": {
+        "cwd": "${workspaceFolder}/slidAid/slAIde"
+      },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agents: Run All",
+      "type": "shell",
+      "command": "echo Starting Host, Presentation, and Summary agents...",
+      "dependsOn": [
+        "Agents: Run Host",
+        "Agents: Run Presentation",
+        "Agents: Run Summary"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "Agents: Render HTML via Host",
+      "type": "shell",
+      "command": "bash -lc \"curl -sS -X POST http://localhost:8000/render-html -H 'Content-Type: application/json' -d '{\\\"prompt\\\":\\\"${input:prompt}\\\"}' && echo\"",
+      "options": {
+        "cwd": "${workspaceFolder}/slidAid/slAIde"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Agents: Open Generated HTML",
+      "type": "shell",
+      "command": "open mine.html",
+      "options": {
+        "cwd": "${workspaceFolder}/slidAid/slAIde"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Agents: Kill Ports",
+      "type": "shell",
+      "command": "pids=\"$(lsof -tiTCP:8000 -sTCP:LISTEN; lsof -tiTCP:8001 -sTCP:LISTEN; lsof -tiTCP:8002 -sTCP:LISTEN)\"; if [ -n \"$pids\" ]; then echo Killing: $pids; kill -9 $pids; else echo 'No agent ports listening'; fi",
+      "options": {
+        "cwd": "${workspaceFolder}/slidAid/slAIde"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Agents: Post HTML to Host",
+      "type": "shell",
+      "command": "python3 - <<'PY'\nimport json,sys,urllib.request,os\npath=os.path.expanduser('${input:htmlPath}')\nwith open(path,'r',encoding='utf-8') as f:\n    html=f.read()\nreq=urllib.request.Request('http://localhost:8000/save-latest-html', data=json.dumps({'html': html}).encode('utf-8'), headers={'Content-Type':'application/json'})\nwith urllib.request.urlopen(req) as resp:\n    print(resp.read().decode())\nPY",
+      "options": {
+        "cwd": "${workspaceFolder}/slidAid/slAIde"
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "prompt",
+      "type": "promptString",
+      "description": "Prompt to send to Host agent",
+      "default": "Make a 3-slide presentation about quantum computing. No PDF. Do not summarize."
+    },
+    {
+      "id": "htmlPath",
+      "type": "promptString",
+      "description": "Path to an HTML file to POST to /save-latest-html",
+      "default": "${workspaceFolder}/slidAid/slAIde/mine.html"
+    }
+  ]
+}
